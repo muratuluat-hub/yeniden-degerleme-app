@@ -392,9 +392,78 @@ def indir(filename):
 
 @app.route('/sablon-indir')
 def sablon_indir():
-    """Şablon Excel dosyasını indir"""
-    sablon_yolu = os.path.join(os.path.dirname(__file__), 'static', 'SABLON_SABIT_KIYMET_LISTESI.xlsx')
-    return send_file(sablon_yolu, as_attachment=True, download_name='SABLON_SABIT_KIYMET_LISTESI.xlsx')
+    """Şablon Excel dosyasını oluştur ve indir"""
+    from datetime import datetime
+
+    # Yeni workbook oluştur
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Şablon"
+
+    # Stil tanımlamaları
+    baslik_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    baslik_font = Font(bold=True, color="FFFFFF", size=12)
+    ornek_fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
+    border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+
+    # Başlık satırı
+    basliklar = [
+        'sabit kıymet', 'sabit kıymet açıklama', 'aktife giriş tarihi',
+        'amortisman oranı', 'amortisman yöntemi', 'defter son değeri',
+        'defter birikmiş amort', 'defter net değeri'
+    ]
+
+    for col_num, baslik in enumerate(basliklar, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = baslik
+        cell.font = baslik_font
+        cell.fill = baslik_fill
+        cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        cell.border = border
+
+    # Örnek veri satırları
+    ornekler = [
+        [254, 'BMW Araç', datetime(2024, 1, 1), 0.20, 'Normal', 3000000, 600000, '=F2-G2'],
+        [254, 'Mercedes Araç', datetime(2025, 1, 1), 0.20, 'Normal', 2000000, 0, '=F3-G3'],
+        [255, 'Daktilo', datetime(2023, 12, 1), 0.10, 'Hızlı', 1000000, 190000, '=F4-G4'],
+        [253, 'Makine', datetime(2020, 10, 1), 0.20, 'Normal', 5000000, 5000000, '=F5-G5'],
+    ]
+
+    for row_num, ornek in enumerate(ornekler, 2):
+        for col_num, value in enumerate(ornek, 1):
+            cell = ws.cell(row=row_num, column=col_num)
+            if col_num == 3:  # Tarih
+                cell.value = value
+                cell.number_format = 'DD.MM.YYYY'
+            elif col_num == 4:  # Amortisman oranı
+                cell.value = value
+                cell.number_format = '0.00'
+            elif col_num in [6, 7]:  # Tutarlar
+                cell.value = value
+                cell.number_format = '#,##0.00'
+            else:
+                cell.value = value
+            cell.fill = ornek_fill
+            cell.border = border
+
+    # Kolon genişlikleri
+    ws.column_dimensions['A'].width = 14
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 18
+    ws.column_dimensions['D'].width = 16
+    ws.column_dimensions['E'].width = 18
+    ws.column_dimensions['F'].width = 18
+    ws.column_dimensions['G'].width = 20
+    ws.column_dimensions['H'].width = 18
+
+    # Geçici dosyaya kaydet
+    temp_path = os.path.join(tempfile.gettempdir(), 'SABLON_SABIT_KIYMET_LISTESI.xlsx')
+    wb.save(temp_path)
+
+    return send_file(temp_path, as_attachment=True, download_name='SABLON_SABIT_KIYMET_LISTESI.xlsx')
 
 if __name__ == '__main__':
     import os
