@@ -75,11 +75,20 @@ def sabit_kiymet_okuma_from_file(file_path):
         else:
             defter_net_degeri = defter_son_degeri - defter_birikmis_amort
 
+        # Amortisman oranını düzelt (yüzde formatında ise ondalığa çevir)
+        try:
+            amortisman_orani = float(row[3]) if row[3] else 0
+            # Eğer 1'den büyükse yüzde formatında yazılmış demektir (örn: 20 = %20)
+            if amortisman_orani > 1:
+                amortisman_orani = amortisman_orani / 100
+        except (ValueError, TypeError):
+            amortisman_orani = 0
+
         sabit_kiymet = {
             'hesap_kodu': row[0],
             'aciklama': row[1],
             'aktif_tarihi': row[2],
-            'amortisman_orani': float(row[3]) if row[3] else 0,
+            'amortisman_orani': amortisman_orani,
             'amortisman_yontemi': row[4],
             'defter_son_degeri': defter_son_degeri,
             'defter_birikmis_amort': defter_birikmis_amort,
