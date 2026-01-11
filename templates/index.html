@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeniden Değerleme ve Amortisman Hesaplama</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+            margin-bottom: 25px;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #5568d3;
+        }
+
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #4654c8;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .file-info {
+            display: none;
+            background: #e8f5e9;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            color: #2e7d32;
+            font-size: 14px;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h3 {
+            color: #1565c0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .result-item span:first-child {
+            color: #666;
+        }
+
+        .result-item span:last-child {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .download-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+        }
+
+        .error {
+            display: none;
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Yeniden Değerleme ve Amortisman</h1>
+            <p>Sabit kıymet listesini yükleyin ve otomatik hesaplama yapın</p>
+        </div>
+
+        <form id="calculationForm">
+            <!-- Excel Dosyası Yükleme -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Excel Dosyasını Sürükle-Bırak</div>
+                <div class="upload-subtext">veya tıklayarak dosya seçin</div>
+                <input type="file" id="excelFile" name="excel_file" accept=".xlsx,.xls" required>
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                ✓ <span id="fileName"></span>
+            </div>
+
+            <!-- Form Alanları -->
+            <div class="grid">
+                <div class="form-group">
+                    <label for="islemYili">İşlem Yılı</label>
+                    <input type="number" id="islemYili" name="islem_yili" min="2000" max="2100" value="2025" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="donem">Dönem</label>
+                    <select id="donem" name="donem" required>
+                        <option value="1">1. Dönem (3 Aylık)</option>
+                        <option value="2">2. Dönem (6 Aylık)</option>
+                        <option value="3">3. Dönem (9 Aylık)</option>
+                        <option value="4" selected>Yıllık</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="ydOrani">Yeniden Değerleme Oranı (%)</label>
+                <input type="text" id="ydOrani" name="yd_orani" placeholder="Örn: 25.49" required>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+                🚀 Hesaplamayı Başlat
+            </button>
+        </form>
+
+        <!-- Yükleniyor -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Hesaplama yapılıyor...</p>
+        </div>
+
+        <!-- Hata Mesajı -->
+        <div class="error" id="error"></div>
+
+        <!-- Sonuç -->
+        <div class="result" id="result">
+            <h3>✅ İşlem Başarıyla Tamamlandı!</h3>
+            <div class="result-item">
+                <span>İşlenen Sabit Kıymet:</span>
+                <span id="sabitKiymetSayisi">-</span>
+            </div>
+            <div class="result-item">
+                <span>YD Fiş Sayısı:</span>
+                <span id="ydFisSayisi">-</span>
+            </div>
+            <div class="result-item">
+                <span>Amortisman Fiş Sayısı:</span>
+                <span id="amortismanFisSayisi">-</span>
+            </div>
+            <button class="btn download-btn" id="downloadBtn">
+                📥 Excel Dosyasını İndir
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('excelFile');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const form = document.getElementById('calculationForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const error = document.getElementById('error');
+        const submitBtn = document.getElementById('submitBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag & Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                showFileName(files[0].name);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                showFileName(e.target.files[0].name);
+            }
+        });
+
+        function showFileName(name) {
+            fileName.textContent = name;
+            fileInfo.classList.add('show');
+        }
+
+        // Form submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Reset
+            result.classList.remove('show');
+            error.classList.remove('show');
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/hesapla', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                loading.classList.remove('show');
+
+                if (response.ok && data.success) {
+                    // Başarılı
+                    document.getElementById('sabitKiymetSayisi').textContent = data.sabit_kiymet_sayisi + ' adet';
+                    document.getElementById('ydFisSayisi').textContent = data.yd_fis_sayisi + ' adet';
+                    document.getElementById('amortismanFisSayisi').textContent = data.amortisman_fis_sayisi + ' adet';
+
+                    downloadBtn.onclick = () => {
+                        window.location.href = data.download_url;
+                    };
+
+                    result.classList.add('show');
+                } else {
+                    // Hata
+                    error.textContent = '❌ ' + (data.error || 'Bir hata oluştu');
+                    error.classList.add('show');
+                }
+            } catch (err) {
+                loading.classList.remove('show');
+                error.textContent = '❌ Bağlantı hatası: ' + err.message;
+                error.classList.add('show');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

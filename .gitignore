@@ -1,0 +1,12 @@
+*.pyc
+__pycache__/
+*.xlsx
+*.xls
+~$*
+.DS_Store
+*.log
+venv/
+env/
+.env
+YD_Amortisman_Sonuc_*
+YEDEK_*
