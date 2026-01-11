@@ -390,6 +390,12 @@ def indir(filename):
     dosya_yolu = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     return send_file(dosya_yolu, as_attachment=True, download_name=filename)
 
+@app.route('/sablon-indir')
+def sablon_indir():
+    """Şablon Excel dosyasını indir"""
+    sablon_yolu = os.path.join(os.path.dirname(__file__), 'static', 'SABLON_SABIT_KIYMET_LISTESI.xlsx')
+    return send_file(sablon_yolu, as_attachment=True, download_name='SABLON_SABIT_KIYMET_LISTESI.xlsx')
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 8080))
