@@ -25,14 +25,27 @@ def hesapla_yd_orani(aktif_tarihi, islem_yili, defter_net_degeri, genel_yd_orani
         return 0
     return genel_yd_orani
 
-def hesapla_yillik_amortisman(yd_sabit_kiymet, yd_net_deger, amortisman_orani, yontem, defter_net_degeri):
+def hesapla_yillik_amortisman(yd_sabit_kiymet, yd_net_deger, amortisman_orani, yontem, defter_net_degeri, aktif_tarihi, islem_yili):
     if defter_net_degeri == 0 or yd_net_deger == 0:
         return 0
     yontem = yontem.strip() if isinstance(yontem, str) else str(yontem)
     if yontem == "Normal":
         return yd_sabit_kiymet * amortisman_orani
     elif yontem == "Hızlı":
-        return yd_net_deger * (amortisman_orani * 2)
+        # Hızlı amortisman yöntemi için son yıl kontrolü
+        aktif_yili = aktif_tarihi.year
+        gecen_yil_sayisi = islem_yili - aktif_yili
+
+        # Amortisman oranından faydalı ömrü hesapla (örn: %20 = 5 yıl)
+        faydali_omur = int(1 / amortisman_orani) if amortisman_orani > 0 else 0
+
+        # Son yıl mı kontrol et (son yıl = faydalı ömür - 1)
+        if faydali_omur > 0 and gecen_yil_sayisi >= (faydali_omur - 1):
+            # Son yılda kalan bakiyenin tamamını amortisman olarak ayır
+            return yd_net_deger
+        else:
+            # Normal hızlı amortisman hesaplaması
+            return yd_net_deger * (amortisman_orani * 2)
     else:
         return yd_sabit_kiymet * amortisman_orani
 
@@ -110,7 +123,8 @@ def yeniden_degerleme_hesapla(sabit_kiymetler, islem_yili, donem, yd_orani_genel
         yd_net_deger = yd_sabit_kiymet - yd_birikmis_amort
         yd_yillik_amortisman = hesapla_yillik_amortisman(
             yd_sabit_kiymet, yd_net_deger, sk['amortisman_orani'],
-            sk['amortisman_yontemi'], sk['defter_net_degeri']
+            sk['amortisman_yontemi'], sk['defter_net_degeri'],
+            sk['aktif_tarihi'], islem_yili
         )
         yd_donem_amortismani = hesapla_donem_amortismani(yd_yillik_amortisman, donem)
 
