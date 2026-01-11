@@ -47,23 +47,41 @@ def hesapla_donem_amortismani(yillik_amortisman, donem):
         return yillik_amortisman
 
 def sabit_kiymet_okuma_from_file(file_path):
-    wb = openpyxl.load_workbook(file_path)
+    wb = openpyxl.load_workbook(file_path, data_only=True)
     sheet = wb.active
     sabit_kiymetler = []
 
     for row in sheet.iter_rows(min_row=2, values_only=True):
         if row[0] is None:
             break
-        defter_birikmis_amort = row[6] if row[6] is not None else 0
-        defter_net_degeri = row[5] - defter_birikmis_amort
+
+        # Değerleri sayıya çevir
+        try:
+            defter_son_degeri = float(row[5]) if row[5] is not None else 0
+        except (ValueError, TypeError):
+            defter_son_degeri = 0
+
+        try:
+            defter_birikmis_amort = float(row[6]) if row[6] is not None else 0
+        except (ValueError, TypeError):
+            defter_birikmis_amort = 0
+
+        # Net değeri hesapla (8. kolon formül veya sayı olabilir)
+        if row[7] is not None:
+            try:
+                defter_net_degeri = float(row[7])
+            except (ValueError, TypeError):
+                defter_net_degeri = defter_son_degeri - defter_birikmis_amort
+        else:
+            defter_net_degeri = defter_son_degeri - defter_birikmis_amort
 
         sabit_kiymet = {
             'hesap_kodu': row[0],
             'aciklama': row[1],
             'aktif_tarihi': row[2],
-            'amortisman_orani': row[3],
+            'amortisman_orani': float(row[3]) if row[3] else 0,
             'amortisman_yontemi': row[4],
-            'defter_son_degeri': row[5],
+            'defter_son_degeri': defter_son_degeri,
             'defter_birikmis_amort': defter_birikmis_amort,
             'defter_net_degeri': defter_net_degeri
         }
