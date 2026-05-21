@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeniden Değerleme ve Amortisman</title>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -252,10 +252,10 @@
             const wb = XLSX.utils.book_new();
             const data = [
                 headers,
-                [254, "Taşıt - 2022 Son Yıl", new Date(2022, 10, 1), 0.20, "Normal", 2000000, 1400000, { f: "F2-G2" }],
-                [254, "Taşıt - 2026 İlk Yıl Kıst", new Date(2026, 3, 1), 0.20, "Normal", 1200000, 0, { f: "F3-G3" }],
-                [255, "Demirbaş - Normal Son Yıl", new Date(2022, 0, 1), 0.20, "Normal", 500000, 400000, { f: "F4-G4" }],
-                [253, "Makine - Devam Ediyor", new Date(2024, 9, 1), 0.20, "Normal", 3000000, 600000, { f: "F5-G5" }],
+                [254, "BMW Araç", new Date(2022, 10, 1), 0.20, "Normal", 2000000, 1400000, { f: "F2-G2" }],
+                [254, "Mercedes Araç", new Date(2026, 3, 1), 0.20, "Normal", 1200000, 0, { f: "F3-G3" }],
+                [255, "Ofis Demirbaşı", new Date(2022, 0, 1), 0.20, "Normal", 500000, 400000, { f: "F4-G4" }],
+                [253, "Üretim Makinesi", new Date(2024, 9, 1), 0.20, "Normal", 3000000, 600000, { f: "F5-G5" }],
             ];
             const ws = XLSX.utils.aoa_to_sheet(data);
             styleTemplateSheet(ws);

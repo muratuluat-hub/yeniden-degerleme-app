@@ -283,10 +283,10 @@ def create_template(path: str | Path) -> None:
     sheet.title = "Şablon"
     headers = ["sabit kıymet", "sabit kıymet açıklama", "aktife giriş tarihi", "amortisman oranı", "amortisman yöntemi", "defter son değeri", "defter birikmiş amort", "defter net değeri"]
     examples = [
-        [254, "BMW Araç", datetime(2024, 1, 1), 0.20, "Normal", 3000000, 600000, "=F2-G2"],
-        [254, "Mercedes Araç", datetime(2025, 1, 1), 0.20, "Normal", 2000000, 0, "=F3-G3"],
-        [255, "Daktilo", datetime(2023, 12, 1), 0.10, "Hızlı", 1000000, 190000, "=F4-G4"],
-        [253, "Makine", datetime(2020, 10, 1), 0.20, "Normal", 5000000, 5000000, "=F5-G5"],
+        [254, "BMW Araç", datetime(2022, 11, 1), 0.20, "Normal", 2000000, 1400000, "=F2-G2"],
+        [254, "Mercedes Araç", datetime(2026, 4, 1), 0.20, "Normal", 1200000, 0, "=F3-G3"],
+        [255, "Ofis Demirbaşı", datetime(2022, 1, 1), 0.20, "Normal", 500000, 400000, "=F4-G4"],
+        [253, "Üretim Makinesi", datetime(2024, 10, 1), 0.20, "Normal", 3000000, 600000, "=F5-G5"],
     ]
     _write_table(sheet, 1, headers, examples)
     widths = [14, 25, 18, 16, 18, 18, 20, 18]
