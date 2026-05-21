@@ -2,6 +2,10 @@
 
 Excel sabit kıymet listesini alır, VUK uygulamasına uygun yeniden değerleme ve amortisman hesaplamalarını yapar, sonucu muhasebe fişleriyle birlikte Excel olarak indirir.
 
+## Canlı Web Sayfası
+
+[https://muratuluat-hub.github.io/yeniden-degerleme-app/](https://muratuluat-hub.github.io/yeniden-degerleme-app/)
+
 ## Özellikler
 
 - Eski uygulamadaki 8 kolonlu sabit kıymet şablonunu destekler.
