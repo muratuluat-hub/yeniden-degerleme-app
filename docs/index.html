@@ -267,7 +267,7 @@
             const buffer = await file.arrayBuffer();
             const wb = XLSX.read(buffer, { type: "array", cellDates: true });
             const ws = wb.Sheets[wb.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "" });
             if (!rows.length) throw new Error("Excel dosyasında veri bulunamadı.");
             const headerRowIndex = detectHeaderRow(rows);
             const mapping = buildMapping(rows[headerRowIndex]);
@@ -522,10 +522,18 @@
                 return parsed ? new Date(parsed.y, parsed.m - 1, parsed.d) : null;
             }
             const text = String(value || "").trim();
-            const match = text.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
-            if (!match) return null;
-            const year = Number(match[3].length === 2 ? `20${match[3]}` : match[3]);
-            return new Date(year, Number(match[2]) - 1, Number(match[1]));
+            let match = text.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
+            if (match) {
+                const first = Number(match[1]);
+                const second = Number(match[2]);
+                const year = Number(match[3].length === 2 ? `20${match[3]}` : match[3]);
+                if (first > 12) return new Date(year, second - 1, first);
+                if (second > 12) return new Date(year, first - 1, second);
+                return new Date(year, second - 1, first);
+            }
+            match = text.match(/^(\d{4})[./-](\d{1,2})[./-](\d{1,2})$/);
+            if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+            return null;
         }
 
         function parseNumber(value) {
