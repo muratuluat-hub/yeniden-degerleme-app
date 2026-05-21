@@ -283,10 +283,16 @@ def create_template(path: str | Path) -> None:
     sheet.title = "Şablon"
     headers = ["sabit kıymet", "sabit kıymet açıklama", "aktife giriş tarihi", "amortisman oranı", "amortisman yöntemi", "defter son değeri", "defter birikmiş amort", "defter net değeri"]
     examples = [
-        [254, "BMW Araç", "01.11.2022", 0.20, "Normal", 2000000, 1400000, "=F2-G2"],
-        [254, "Mercedes Araç", "01.04.2026", 0.20, "Normal", 1200000, 0, "=F3-G3"],
-        [255, "Ofis Demirbaşı", "01.01.2022", 0.20, "Hızlı", 500000, 400000, "=F4-G4"],
-        [253, "Üretim Makinesi", "01.10.2024", 0.20, "Normal", 3000000, 600000, "=F5-G5"],
+        [252, "Fabrika Binası", "01.01.2020", 0.02, "Normal", 12000000, 1440000, "=F2-G2"],
+        [253, "CNC Makinesi", "15.03.2021", 0.20, "Hızlı", 3500000, 2450000, "=F3-G3"],
+        [253, "Paketleme Hattı", "10.07.2023", 0.10, "Normal", 2800000, 560000, "=F4-G4"],
+        [254, "BMW Araç", "01.11.2022", 0.20, "Normal", 2000000, 1400000, "=F5-G5"],
+        [254, "Mercedes Araç", "01.04.2026", 0.20, "Normal", 1200000, 0, "=F6-G6"],
+        [255, "Ofis Mobilyaları", "01.01.2022", 0.20, "Hızlı", 500000, 400000, "=F7-G7"],
+        [255, "Bilgisayar Donanımı", "05.05.2024", 0.25, "Hızlı", 750000, 375000, "=F8-G8"],
+        [264, "Özel Maliyet", "01.09.2023", 0.20, "Normal", 1500000, 450000, "=F9-G9"],
+        [267, "Diğer Maddi Olmayan Hak", "01.02.2024", 0.10, "Hızlı", 900000, 180000, "=F10-G10"],
+        [267, "Diğer Duran Varlık", "01.12.2025", 0.20, "Normal", 650000, 65000, "=F11-G11"],
     ]
     _write_table(sheet, 1, headers, examples)
     widths = [14, 25, 18, 16, 18, 18, 20, 18]
@@ -299,7 +305,7 @@ def create_template(path: str | Path) -> None:
             if col in (1, 2, 5):
                 cell.number_format = "General"
             elif col == 3:
-                cell.number_format = "dd.mm.yyyy"
+                cell.number_format = "@"
             elif col == 4:
                 cell.number_format = "0.00%"
             elif col in (6, 7, 8):

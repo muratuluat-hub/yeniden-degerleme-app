@@ -252,10 +252,16 @@
             const wb = XLSX.utils.book_new();
             const data = [
                 headers,
-                [254, "BMW Araç", "01.11.2022", 0.20, "Normal", 2000000, 1400000, { f: "F2-G2" }],
-                [254, "Mercedes Araç", "01.04.2026", 0.20, "Normal", 1200000, 0, { f: "F3-G3" }],
-                [255, "Ofis Demirbaşı", "01.01.2022", 0.20, "Hızlı", 500000, 400000, { f: "F4-G4" }],
-                [253, "Üretim Makinesi", "01.10.2024", 0.20, "Normal", 3000000, 600000, { f: "F5-G5" }],
+                [252, "Fabrika Binası", "01.01.2020", 0.02, "Normal", 12000000, 1440000, { f: "F2-G2" }],
+                [253, "CNC Makinesi", "15.03.2021", 0.20, "Hızlı", 3500000, 2450000, { f: "F3-G3" }],
+                [253, "Paketleme Hattı", "10.07.2023", 0.10, "Normal", 2800000, 560000, { f: "F4-G4" }],
+                [254, "BMW Araç", "01.11.2022", 0.20, "Normal", 2000000, 1400000, { f: "F5-G5" }],
+                [254, "Mercedes Araç", "01.04.2026", 0.20, "Normal", 1200000, 0, { f: "F6-G6" }],
+                [255, "Ofis Mobilyaları", "01.01.2022", 0.20, "Hızlı", 500000, 400000, { f: "F7-G7" }],
+                [255, "Bilgisayar Donanımı", "05.05.2024", 0.25, "Hızlı", 750000, 375000, { f: "F8-G8" }],
+                [264, "Özel Maliyet", "01.09.2023", 0.20, "Normal", 1500000, 450000, { f: "F9-G9" }],
+                [267, "Diğer Maddi Olmayan Hak", "01.02.2024", 0.10, "Hızlı", 900000, 180000, { f: "F10-G10" }],
+                [267, "Diğer Duran Varlık", "01.12.2025", 0.20, "Normal", 650000, 65000, { f: "F11-G11" }],
             ];
             const ws = XLSX.utils.aoa_to_sheet(data);
             styleTemplateSheet(ws);
@@ -475,7 +481,7 @@
                     if (r === 0) cell.s = headerStyle();
                     else {
                         cell.s.fill = { fgColor: { rgb: "E7E6E6" } };
-                        if (c === 2) cell.z = "dd.mm.yyyy";
+                        if (c === 2) cell.z = "@";
                         if (c === 3) cell.z = "0.00%";
                         if ([5, 6, 7].includes(c)) cell.z = moneyFormat;
                     }
