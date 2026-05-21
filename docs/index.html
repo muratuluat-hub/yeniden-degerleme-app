@@ -365,6 +365,7 @@
                 const revaluedNet = revaluedCost - revaluedAccumulated;
                 const annualAmount = activeMonths === 0 ? 0 : calculateAnnualDepreciation(asset, revaluedCost, revaluedNet);
                 const periodDepreciation = annualAmount * activeMonths / 12;
+                const status = activeMonths === 0 ? "Amortisman hakkı yok" : assetStatus(asset, year);
                 return {
                     asset,
                     ydRate: eligible ? ydRate : 0,
@@ -376,7 +377,7 @@
                     fundIncrease: asset.net * assetFactor,
                     annualDepreciation: annualAmount,
                     periodDepreciation,
-                    status: assetStatus(asset, year),
+                    status,
                 };
             });
         }

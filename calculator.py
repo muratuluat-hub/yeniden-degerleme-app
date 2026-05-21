@@ -203,7 +203,7 @@ def calculate_assets(assets: list[Asset], islem_yili: int, donem: int, yd_orani:
         asset_factor = factor if eligible_for_revaluation else 0
         is_passenger_car = _is_passenger_car(asset)
         active_months = _active_months(asset.tarih, islem_yili, period_months, asset.omur, is_passenger_car)
-        status = _asset_status(asset, islem_yili, is_passenger_car)
+        status = "Amortisman hakkı yok" if active_months == 0 else _asset_status(asset, islem_yili, is_passenger_car)
         revalued_cost = asset.maliyet * (1 + asset_factor)
         revalued_accumulated = asset.birikmis_amortisman * (1 + asset_factor)
         revalued_net = revalued_cost - revalued_accumulated
