@@ -357,7 +357,9 @@
             const periodMonths = { 1: 3, 2: 6, 3: 9, 4: 12 }[period] || 12;
             const factor = ydRate / 100;
             return assets.map((asset) => {
-                const eligible = asset.date.getFullYear() < year && asset.net > 0;
+                const startYear = asset.date.getFullYear();
+                const lastYear = startYear + asset.life - 1;
+                const eligible = startYear < year && asset.net > 0 && year <= lastYear;
                 const assetFactor = eligible ? factor : 0;
                 const activeMonths = activeMonthsFor(asset, year, periodMonths);
                 const revaluedCost = asset.cost * (1 + assetFactor);
