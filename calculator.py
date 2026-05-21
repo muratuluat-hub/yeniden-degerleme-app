@@ -210,7 +210,7 @@ def calculate_assets(assets: list[Asset], islem_yili: int, donem: int, yd_orani:
         revaluation_increase = asset.maliyet * asset_factor
         accumulated_increase = asset.birikmis_amortisman * asset_factor
         fund_increase = asset.net_deger * asset_factor
-        revalued_annual_depreciation = _annual_depreciation(asset, base=revalued_cost, net_base=revalued_net)
+        revalued_annual_depreciation = 0 if active_months == 0 else _annual_depreciation(asset, base=revalued_cost, net_base=revalued_net)
         revalued_period_depreciation = revalued_annual_depreciation * active_months / 12
 
         results.append(
@@ -257,6 +257,8 @@ def _is_passenger_car(asset: Asset) -> bool:
 
 def _asset_status(asset: Asset, year: int, is_passenger_car: bool) -> str:
     last_year = asset.tarih.year + asset.omur - 1
+    if year > last_year:
+        return "Amortisman hakkı yok"
     if is_passenger_car:
         if year == last_year:
             return "Son yıl dikkat"

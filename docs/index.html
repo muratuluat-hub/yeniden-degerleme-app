@@ -363,7 +363,7 @@
                 const revaluedCost = asset.cost * (1 + assetFactor);
                 const revaluedAccumulated = asset.accumulated * (1 + assetFactor);
                 const revaluedNet = revaluedCost - revaluedAccumulated;
-                const annualAmount = calculateAnnualDepreciation(asset, revaluedCost, revaluedNet);
+                const annualAmount = activeMonths === 0 ? 0 : calculateAnnualDepreciation(asset, revaluedCost, revaluedNet);
                 const periodDepreciation = annualAmount * activeMonths / 12;
                 return {
                     asset,
@@ -399,6 +399,7 @@
         function assetStatus(asset, year) {
             const startYear = asset.date.getFullYear();
             const lastYear = startYear + asset.life - 1;
+            if (year > lastYear) return "Amortisman hakkı yok";
             if (asset.passenger) {
                 if (year === lastYear) return "Son yıl dikkat";
                 if (year === startYear) return "Binek ilk yıl kıst";
