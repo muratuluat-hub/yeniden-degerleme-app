@@ -363,8 +363,8 @@
                 const revaluedCost = asset.cost * (1 + assetFactor);
                 const revaluedAccumulated = asset.accumulated * (1 + assetFactor);
                 const revaluedNet = revaluedCost - revaluedAccumulated;
-                const annualDepreciation = annualDepreciation(asset, revaluedCost, revaluedNet);
-                const periodDepreciation = annualDepreciation * activeMonths / 12;
+                const annualAmount = calculateAnnualDepreciation(asset, revaluedCost, revaluedNet);
+                const periodDepreciation = annualAmount * activeMonths / 12;
                 return {
                     asset,
                     ydRate: eligible ? ydRate : 0,
@@ -374,7 +374,7 @@
                     assetIncrease: asset.cost * assetFactor,
                     accumulatedIncrease: asset.accumulated * assetFactor,
                     fundIncrease: asset.net * assetFactor,
-                    annualDepreciation,
+                    annualDepreciation: annualAmount,
                     periodDepreciation,
                     status: assetStatus(asset, year),
                 };
@@ -390,7 +390,7 @@
             return asset.passenger ? periodMonths - month + 1 : periodMonths;
         }
 
-        function annualDepreciation(asset, cost, net) {
+        function calculateAnnualDepreciation(asset, cost, net) {
             if (net <= 0) return 0;
             if (asset.method === "Azalan") return Math.min(net * asset.rate * 2, cost * 0.5);
             return cost * asset.rate;
@@ -481,7 +481,10 @@
                     if (r === 0) cell.s = headerStyle();
                     else {
                         cell.s.fill = { fgColor: { rgb: "E7E6E6" } };
-                        if (c === 2) cell.z = "@";
+                        if (c === 2) {
+                            cell.t = "s";
+                            cell.z = "@";
+                        }
                         if (c === 3) cell.z = "0.00%";
                         if ([5, 6, 7].includes(c)) cell.z = moneyFormat;
                     }
