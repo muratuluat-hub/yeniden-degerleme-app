@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeniden Değerleme ve Amortisman</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #263238;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            width: 100%;
+            max-width: 620px;
+            padding: 38px;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .header { text-align: center; margin-bottom: 28px; }
+        .header h1 { color: #263238; font-size: 28px; line-height: 1.2; margin-bottom: 10px; }
+        .header p { color: #607d8b; font-size: 14px; }
+        .template-link {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 9px 16px;
+            background: #11998e;
+            color: #ffffff;
+            text-decoration: none;
+            border: 0;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 38px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9ff;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover, .upload-area.dragover { background: #eef1ff; border-color: #5568d3; }
+        .upload-icon { font-size: 44px; }
+        .upload-text { color: #263238; font-size: 16px; font-weight: 700; }
+        .upload-subtext { color: #78909c; font-size: 13px; }
+        input[type="file"] { display: none; }
+        .file-info {
+            display: none;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 22px;
+            font-size: 14px;
+        }
+        .file-info.show { display: flex; gap: 6px; flex-wrap: wrap; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { display: block; margin-bottom: 22px; }
+        .form-group span {
+            display: block;
+            color: #263238;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
+            border: 2px solid #dfe5ea;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+        .btn {
+            width: 100%;
+            min-height: 50px;
+            padding: 14px;
+            border: 0;
+            border-radius: 10px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .result, .error { display: none; }
+        .error.show {
+            display: block;
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 8px;
+            background: #ffebee;
+            color: #b71c1c;
+            font-size: 14px;
+        }
+        .result.show {
+            display: block;
+            margin-top: 22px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #e3f2fd;
+        }
+        .result h2 { color: #1565c0; font-size: 18px; margin-bottom: 14px; }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            background: #ffffff;
+            padding: 11px 14px;
+            border-radius: 7px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        @media (max-width: 620px) {
+            body { align-items: flex-start; }
+            .container { padding: 26px; }
+            .header h1 { font-size: 23px; }
+            .grid { grid-template-columns: 1fr; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <h1>Yeniden Değerleme ve Amortisman</h1>
+            <p>Sabit kıymet listesini yükleyin ve otomatik hesaplama yapın</p>
+            <button class="template-link" id="templateBtn">Şablon Excel Dosyasını İndir</button>
+        </header>
+
+        <form id="calculationForm">
+            <label class="upload-area" id="uploadArea" for="excelFile">
+                <span class="upload-icon">📁</span>
+                <span class="upload-text">Excel Dosyasını Sürükle-Bırak</span>
+                <span class="upload-subtext">veya tıklayarak dosya seçin</span>
+                <input type="file" id="excelFile" name="excel_file" accept=".xlsx,.xlsm" required>
+            </label>
+
+            <div class="file-info" id="fileInfo">
+                <span>Seçilen dosya:</span>
+                <strong id="fileName"></strong>
+            </div>
+
+            <div class="grid">
+                <label class="form-group" for="islemYili">
+                    <span>İşlem Yılı</span>
+                    <input type="number" id="islemYili" name="islem_yili" min="2000" max="2100" value="2026" required>
+                </label>
+
+                <label class="form-group" for="donem">
+                    <span>Dönem</span>
+                    <select id="donem" name="donem" required>
+                        <option value="1">1. Dönem (3 Aylık)</option>
+                        <option value="2">2. Dönem (6 Aylık)</option>
+                        <option value="3">3. Dönem (9 Aylık)</option>
+                        <option value="4" selected>Yıllık</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="form-group" for="ydOrani">
+                <span>Yeniden Değerleme Oranı (%)</span>
+                <input type="text" id="ydOrani" name="yd_orani" placeholder="Örn: 10" required>
+            </label>
+
+            <button type="submit" class="btn" id="submitBtn">Hesaplamayı Başlat</button>
+        </form>
+
+        <section class="error" id="error"></section>
+
+        <section class="result" id="result">
+            <h2>İşlem başarıyla tamamlandı</h2>
+            <div class="result-item"><span>İşlenen Sabit Kıymet</span><strong id="sabitKiymetSayisi">-</strong></div>
+            <div class="result-item"><span>YD Fiş Sayısı</span><strong id="ydFisSayisi">-</strong></div>
+            <div class="result-item"><span>Amortisman Fiş Sayısı</span><strong id="amortismanFisSayisi">-</strong></div>
+        </section>
+    </main>
+
+    <script>
+        const headers = ["sabit kıymet", "sabit kıymet açıklama", "aktife giriş tarihi", "amortisman oranı", "amortisman yöntemi", "defter son değeri", "defter birikmiş amort", "defter net değeri"];
+        const moneyFormat = "#,##0.00";
+
+        const uploadArea = document.getElementById("uploadArea");
+        const fileInput = document.getElementById("excelFile");
+        const fileInfo = document.getElementById("fileInfo");
+        const fileName = document.getElementById("fileName");
+        const form = document.getElementById("calculationForm");
+        const result = document.getElementById("result");
+        const error = document.getElementById("error");
+
+        document.getElementById("templateBtn").addEventListener("click", downloadTemplate);
+        uploadArea.addEventListener("dragover", (event) => { event.preventDefault(); uploadArea.classList.add("dragover"); });
+        uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("dragover"));
+        uploadArea.addEventListener("drop", (event) => {
+            event.preventDefault();
+            uploadArea.classList.remove("dragover");
+            if (event.dataTransfer.files.length > 0) {
+                fileInput.files = event.dataTransfer.files;
+                showFileName(event.dataTransfer.files[0].name);
+            }
+        });
+        fileInput.addEventListener("change", (event) => {
+            if (event.target.files.length > 0) showFileName(event.target.files[0].name);
+        });
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            hideMessages();
+            try {
+                const file = fileInput.files[0];
+                if (!file) throw new Error("Excel dosyası seçilmedi.");
+                const islemYili = Number(document.getElementById("islemYili").value);
+                const donem = Number(document.getElementById("donem").value);
+                const ydOrani = parseNumber(document.getElementById("ydOrani").value);
+                const assets = await readAssets(file);
+                const rows = calculateAssets(assets, islemYili, donem, ydOrani);
+                const summary = createResultWorkbook(rows, islemYili, donem, ydOrani);
+                document.getElementById("sabitKiymetSayisi").textContent = `${summary.assetCount} adet`;
+                document.getElementById("ydFisSayisi").textContent = `${summary.ydVoucherCount} adet`;
+                document.getElementById("amortismanFisSayisi").textContent = `${summary.depreciationVoucherCount} adet`;
+                result.classList.add("show");
+            } catch (err) {
+                error.textContent = err.message || String(err);
+                error.classList.add("show");
+            }
+        });
+
+        function showFileName(name) {
+            fileName.textContent = name;
+            fileInfo.classList.add("show");
+        }
+
+        function hideMessages() {
+            result.classList.remove("show");
+            error.classList.remove("show");
+        }
+
+        function downloadTemplate() {
+            const wb = XLSX.utils.book_new();
+            const data = [
+                headers,
+                [254, "Taşıt - 2022 Son Yıl", new Date(2022, 10, 1), 0.20, "Normal", 2000000, 1400000, { f: "F2-G2" }],
+                [254, "Taşıt - 2026 İlk Yıl Kıst", new Date(2026, 3, 1), 0.20, "Normal", 1200000, 0, { f: "F3-G3" }],
+                [255, "Demirbaş - Normal Son Yıl", new Date(2022, 0, 1), 0.20, "Normal", 500000, 400000, { f: "F4-G4" }],
+                [253, "Makine - Devam Ediyor", new Date(2024, 9, 1), 0.20, "Normal", 3000000, 600000, { f: "F5-G5" }],
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            styleTemplateSheet(ws);
+            XLSX.utils.book_append_sheet(wb, ws, "Şablon");
+            XLSX.writeFile(wb, "SABLON_SABIT_KIYMET_LISTESI.xlsx", { cellStyles: true });
+        }
+
+        async function readAssets(file) {
+            const buffer = await file.arrayBuffer();
+            const wb = XLSX.read(buffer, { type: "array", cellDates: true });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: "" });
+            if (!rows.length) throw new Error("Excel dosyasında veri bulunamadı.");
+            const headerRowIndex = detectHeaderRow(rows);
+            const mapping = buildMapping(rows[headerRowIndex]);
+            for (const field of ["name", "date", "cost"]) {
+                if (mapping[field] === undefined) throw new Error("Zorunlu kolonlar bulunamadı.");
+            }
+            if (mapping.life === undefined && mapping.rate === undefined) throw new Error("Amortisman oranı veya faydalı ömür bulunamadı.");
+            const assets = [];
+            for (const row of rows.slice(headerRowIndex + 1)) {
+                const asset = parseAsset(row, mapping);
+                if (asset) assets.push(asset);
+            }
+            if (!assets.length) throw new Error("Hesaplanacak geçerli sabit kıymet satırı bulunamadı.");
+            return assets;
+        }
+
+        function detectHeaderRow(rows) {
+            let bestIndex = 0;
+            let bestScore = -1;
+            rows.slice(0, 10).forEach((row, index) => {
+                const mapping = buildMapping(row);
+                const score = Object.keys(mapping).length;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestIndex = index;
+                }
+            });
+            return bestIndex;
+        }
+
+        function buildMapping(row) {
+            const aliases = {
+                code: ["sabit kiymet", "kiymet no", "demirbas no", "no"],
+                name: ["sabit kiymet aciklama", "kiymet adi", "aciklama", "cinsi"],
+                date: ["aktife giris tarihi", "giris tarihi", "edinim tarihi", "tarih"],
+                rate: ["amortisman orani", "oran"],
+                method: ["amortisman yontemi", "yontem"],
+                cost: ["defter son degeri", "maliyet", "bedel", "tutar"],
+                accumulated: ["defter birikmis amort", "birikmis amortisman"],
+                net: ["defter net degeri", "net deger"],
+                life: ["faydali omur", "omur", "sure"],
+                passenger: ["binek oto", "binek"],
+            };
+            const normalized = row.map(normalize);
+            const mapping = {};
+            for (const [field, names] of Object.entries(aliases)) {
+                const index = normalized.findIndex((value) => names.some((name) => value === name || value.includes(name)));
+                if (index >= 0) mapping[field] = index;
+            }
+            return mapping;
+        }
+
+        function parseAsset(row, mapping) {
+            const get = (field) => mapping[field] === undefined ? "" : row[mapping[field]];
+            const name = String(get("name") || "").trim();
+            const date = parseDate(get("date"));
+            const cost = parseNumber(get("cost"));
+            const rate = parseRate(get("rate"));
+            let life = parseNumber(get("life"));
+            if (!life && rate) life = Math.max(Math.round(1 / rate), 1);
+            if (!name || !date || !cost || !life) return null;
+            const accumulated = parseNumber(get("accumulated")) || 0;
+            const net = parseNumber(get("net")) || cost - accumulated;
+            const code = String(get("code") || "SK").trim();
+            return {
+                code,
+                name,
+                account: code,
+                date,
+                cost,
+                accumulated,
+                net,
+                rate: rate || 1 / life,
+                life,
+                method: parseMethod(get("method")),
+                passenger: parsePassenger(get("passenger"), code, name),
+            };
+        }
+
+        function calculateAssets(assets, year, period, ydRate) {
+            const periodMonths = { 1: 3, 2: 6, 3: 9, 4: 12 }[period] || 12;
+            const factor = ydRate / 100;
+            return assets.map((asset) => {
+                const eligible = asset.date.getFullYear() < year && asset.net > 0;
+                const assetFactor = eligible ? factor : 0;
+                const activeMonths = activeMonthsFor(asset, year, periodMonths);
+                const revaluedCost = asset.cost * (1 + assetFactor);
+                const revaluedAccumulated = asset.accumulated * (1 + assetFactor);
+                const revaluedNet = revaluedCost - revaluedAccumulated;
+                const annualDepreciation = annualDepreciation(asset, revaluedCost, revaluedNet);
+                const periodDepreciation = annualDepreciation * activeMonths / 12;
+                return {
+                    asset,
+                    ydRate: eligible ? ydRate : 0,
+                    revaluedCost,
+                    revaluedAccumulated,
+                    revaluedNet,
+                    assetIncrease: asset.cost * assetFactor,
+                    accumulatedIncrease: asset.accumulated * assetFactor,
+                    fundIncrease: asset.net * assetFactor,
+                    annualDepreciation,
+                    periodDepreciation,
+                    status: assetStatus(asset, year),
+                };
+            });
+        }
+
+        function activeMonthsFor(asset, year, periodMonths) {
+            const startYear = asset.date.getFullYear();
+            if (startYear > year) return 0;
+            if (startYear < year) return year > startYear + asset.life - 1 ? 0 : periodMonths;
+            const month = asset.date.getMonth() + 1;
+            if (month > periodMonths) return 0;
+            return asset.passenger ? periodMonths - month + 1 : periodMonths;
+        }
+
+        function annualDepreciation(asset, cost, net) {
+            if (net <= 0) return 0;
+            if (asset.method === "Azalan") return Math.min(net * asset.rate * 2, cost * 0.5);
+            return cost * asset.rate;
+        }
+
+        function assetStatus(asset, year) {
+            const startYear = asset.date.getFullYear();
+            const lastYear = startYear + asset.life - 1;
+            if (asset.passenger) {
+                if (year === lastYear) return "Son yıl dikkat";
+                if (year === startYear) return "Binek ilk yıl kıst";
+                return "";
+            }
+            return year === lastYear ? "Son yıl" : "";
+        }
+
+        function createResultWorkbook(rows, year, period, ydRate) {
+            const wb = XLSX.utils.book_new();
+            const summary = createMainSheet(rows, year, period, ydRate);
+            const vouchers = createVoucherSheet(rows);
+            XLSX.utils.book_append_sheet(wb, summary, "YD ve Amortisman");
+            XLSX.utils.book_append_sheet(wb, vouchers.sheet, "Muhasebe Fişleri");
+            const filename = `YD_Amortisman_Sonuc_${year}_${periodLabel(period).replaceAll(" ", "_")}_${timestamp()}.xlsx`;
+            XLSX.writeFile(wb, filename, { cellStyles: true });
+            return {
+                assetCount: rows.length,
+                ydVoucherCount: vouchers.ydCount,
+                depreciationVoucherCount: vouchers.depCount,
+            };
+        }
+
+        function createMainSheet(rows, year, period, ydRate) {
+            const data = [
+                ["YENİDEN DEĞERLEME VE AMORTİSMAN TABLOSU"],
+                [`İşlem Yılı: ${year}`],
+                [`Dönem: ${periodLabel(period)}`],
+                [`YD Oranı: %${Number(ydRate).toFixed(4)}`],
+                [],
+                ["Sabit Kıymet", "Açıklama", "Aktif Giriş Tarihi", "Amort. Oranı", "Amort. Yöntemi", "Defter Son Değeri", "Defter Birikmiş Amort.", "Defter Net Değeri", "", "YD Oranı", "YD Sabit Kıymet", "YD Birikmiş Amort.", "YD Net Değer", "", "YD Yıllık Amortisman", "YD Dönem Amortismanı", "Durum"],
+            ];
+            rows.forEach(({ asset, ydRate, revaluedCost, revaluedAccumulated, revaluedNet, annualDepreciation, periodDepreciation, status }) => {
+                data.push([asset.code, asset.name, formatDate(asset.date), asset.rate, asset.method === "Azalan" ? "Hızlı" : "Normal", asset.cost, asset.accumulated, asset.net, "", ydRate / 100, revaluedCost, revaluedAccumulated, revaluedNet, "", annualDepreciation, periodDepreciation, status]);
+            });
+            const totalRow = data.length + 1;
+            data.push(["", "TOPLAM", "", "", "", { f: `SUM(F7:F${totalRow - 1})` }, { f: `SUM(G7:G${totalRow - 1})` }, { f: `SUM(H7:H${totalRow - 1})` }, "", "", { f: `SUM(K7:K${totalRow - 1})` }, { f: `SUM(L7:L${totalRow - 1})` }, { f: `SUM(M7:M${totalRow - 1})` }, "", { f: `SUM(O7:O${totalRow - 1})` }, { f: `SUM(P7:P${totalRow - 1})` }, ""]);
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 16 } }];
+            ws["!cols"] = [12, 20, 15, 12, 15, 18, 18, 18, 2, 12, 18, 18, 18, 2, 18, 18, 18].map((wch) => ({ wch }));
+            applyResultFormats(ws, data.length);
+            return ws;
+        }
+
+        function createVoucherSheet(rows) {
+            const ydGroups = {};
+            const depGroups = {};
+            rows.forEach((row) => {
+                const code = String(row.asset.account);
+                if (row.fundIncrease > 0) {
+                    ydGroups[code] ||= { assetIncrease: 0, accumulatedIncrease: 0, fundIncrease: 0 };
+                    ydGroups[code].assetIncrease += row.assetIncrease;
+                    ydGroups[code].accumulatedIncrease += row.accumulatedIncrease;
+                    ydGroups[code].fundIncrease += row.fundIncrease;
+                }
+                if (row.periodDepreciation > 0) depGroups[code] = (depGroups[code] || 0) + row.periodDepreciation;
+            });
+            const data = [["MUHASEBE FİŞLERİ"], [], ["YENİDEN DEĞERLEME FİŞLERİ"]];
+            Object.entries(ydGroups).forEach(([code, total]) => {
+                data.push([`Yeniden Değerleme - ${code}`], ["Hesap Kodu", "Hesap Adı", "Borç", "Alacak"], [Number(code) || code, "", total.assetIncrease, ""], [257, "", "", total.accumulatedIncrease], [522, "", "", total.fundIncrease], []);
+            });
+            data.push([], ["AMORTİSMAN FİŞLERİ"]);
+            Object.entries(depGroups).forEach(([code, amount]) => {
+                data.push([`Dönem Amortismanı - ${code}`], ["Hesap Kodu", "Hesap Adı", "Borç", "Alacak"], [770, "", amount, ""], [257, "", "", amount], []);
+            });
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            ws["!cols"] = [{ wch: 15 }, { wch: 30 }, { wch: 18 }, { wch: 18 }];
+            applyVoucherFormats(ws, data.length);
+            return { sheet: ws, ydCount: Object.keys(ydGroups).length, depCount: Object.keys(depGroups).length };
+        }
+
+        function styleTemplateSheet(ws) {
+            ws["!cols"] = [14, 28, 18, 16, 18, 18, 20, 18].map((wch) => ({ wch }));
+            const range = XLSX.utils.decode_range(ws["!ref"]);
+            for (let r = range.s.r; r <= range.e.r; r++) {
+                for (let c = range.s.c; c <= range.e.c; c++) {
+                    const cell = ws[XLSX.utils.encode_cell({ r, c })];
+                    if (!cell) continue;
+                    cell.s = cell.s || {};
+                    if (r === 0) cell.s = headerStyle();
+                    else {
+                        cell.s.fill = { fgColor: { rgb: "E7E6E6" } };
+                        if (c === 2) cell.z = "dd.mm.yyyy";
+                        if (c === 3) cell.z = "0.00%";
+                        if ([5, 6, 7].includes(c)) cell.z = moneyFormat;
+                    }
+                }
+            }
+        }
+
+        function applyResultFormats(ws, rowCount) {
+            for (let c = 0; c <= 16; c++) {
+                const header = ws[XLSX.utils.encode_cell({ r: 5, c })];
+                if (header && header.v) header.s = headerStyle();
+            }
+            for (let r = 6; r < rowCount; r++) {
+                [3, 9].forEach((c) => setFormat(ws, r, c, "0.00%"));
+                [5, 6, 7, 10, 11, 12, 14, 15].forEach((c) => setFormat(ws, r, c, moneyFormat));
+            }
+        }
+
+        function applyVoucherFormats(ws, rowCount) {
+            for (let r = 0; r < rowCount; r++) {
+                const first = ws[XLSX.utils.encode_cell({ r, c: 0 })];
+                if (first && (first.v === "YENİDEN DEĞERLEME FİŞLERİ" || first.v === "AMORTİSMAN FİŞLERİ")) first.s = headerStyle();
+                for (let c = 2; c <= 3; c++) setFormat(ws, r, c, moneyFormat);
+            }
+        }
+
+        function setFormat(ws, r, c, z) {
+            const cell = ws[XLSX.utils.encode_cell({ r, c })];
+            if (cell) cell.z = z;
+        }
+
+        function headerStyle() {
+            return {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4472C4" } },
+                alignment: { horizontal: "center", wrapText: true },
+            };
+        }
+
+        function parseDate(value) {
+            if (value instanceof Date) return value;
+            if (typeof value === "number") {
+                const parsed = XLSX.SSF.parse_date_code(value);
+                return parsed ? new Date(parsed.y, parsed.m - 1, parsed.d) : null;
+            }
+            const text = String(value || "").trim();
+            const match = text.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
+            if (!match) return null;
+            const year = Number(match[3].length === 2 ? `20${match[3]}` : match[3]);
+            return new Date(year, Number(match[2]) - 1, Number(match[1]));
+        }
+
+        function parseNumber(value) {
+            if (typeof value === "number") return value;
+            const text = String(value || "").trim().replace(/\s/g, "");
+            if (!text) return null;
+            const normalized = text.includes(",") && text.includes(".") ? text.replaceAll(".", "").replace(",", ".") : text.replace(",", ".");
+            const number = Number(normalized.replace("%", ""));
+            return Number.isFinite(number) ? number : null;
+        }
+
+        function parseRate(value) {
+            const number = parseNumber(value);
+            if (!number) return 0;
+            return number > 1 ? number / 100 : number;
+        }
+
+        function parseMethod(value) {
+            const text = normalize(value);
+            return text.includes("hizli") || text.includes("azal") ? "Azalan" : "Normal";
+        }
+
+        function parsePassenger(value, code, name) {
+            const text = normalize(value);
+            if (["e", "evet", "yes", "true", "1", "x"].includes(text)) return true;
+            const description = normalize(name);
+            return String(code).trim() === "254" || ["arac", "oto", "otomobil", "binek", "bmw", "mercedes", "audi"].some((word) => description.includes(word));
+        }
+
+        function parseRateInput(value) { return Number(String(value).replace(",", ".")); }
+        function normalize(value) {
+            return String(value || "").toLowerCase().trim()
+                .replaceAll("ç", "c").replaceAll("ğ", "g").replaceAll("ı", "i").replaceAll("ö", "o").replaceAll("ş", "s").replaceAll("ü", "u")
+                .replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+        }
+        function periodLabel(period) { return ({ 1: "1. Dönem", 2: "2. Dönem", 3: "3. Dönem", 4: "Yillik" }[period] || "Yillik"); }
+        function formatDate(date) { return `${String(date.getDate()).padStart(2, "0")}.${String(date.getMonth() + 1).padStart(2, "0")}.${date.getFullYear()}`; }
+        function timestamp() {
+            const d = new Date();
+            return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}_${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}${String(d.getSeconds()).padStart(2, "0")}`;
+        }
+    </script>
+</body>
+</html>
