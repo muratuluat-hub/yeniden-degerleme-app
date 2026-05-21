@@ -1,0 +1,251 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #263238;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    width: 100%;
+    max-width: 620px;
+    padding: 38px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.header h1 {
+    color: #263238;
+    font-size: 28px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: #607d8b;
+    font-size: 14px;
+}
+
+.template-link {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 9px 16px;
+    background: #11998e;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border: 3px dashed #667eea;
+    border-radius: 12px;
+    padding: 38px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #f8f9ff;
+    margin-bottom: 20px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.upload-area:hover,
+.upload-area.dragover {
+    background: #eef1ff;
+    border-color: #5568d3;
+}
+
+.upload-icon {
+    font-size: 44px;
+}
+
+.upload-text {
+    color: #263238;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.upload-subtext {
+    color: #78909c;
+    font-size: 13px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-info {
+    display: none;
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 22px;
+    font-size: 14px;
+}
+
+.file-info.show {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    display: block;
+    margin-bottom: 22px;
+}
+
+.form-group span {
+    display: block;
+    color: #263238;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 14px;
+    border: 2px solid #dfe5ea;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.btn {
+    width: 100%;
+    min-height: 50px;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.btn:disabled {
+    background: #b0bec5;
+    cursor: not-allowed;
+}
+
+.loading,
+.result,
+.error {
+    display: none;
+}
+
+.loading.show {
+    display: block;
+    text-align: center;
+    margin-top: 22px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #eceff1;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error.show {
+    display: block;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 8px;
+    background: #ffebee;
+    color: #b71c1c;
+    font-size: 14px;
+}
+
+.result.show {
+    display: block;
+    margin-top: 22px;
+    padding: 20px;
+    border-radius: 10px;
+    background: #e3f2fd;
+}
+
+.result h2 {
+    color: #1565c0;
+    font-size: 18px;
+    margin-bottom: 14px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: #ffffff;
+    padding: 11px 14px;
+    border-radius: 7px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.download-btn {
+    margin-top: 14px;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+@media (max-width: 620px) {
+    body {
+        align-items: flex-start;
+    }
+
+    .container {
+        padding: 26px;
+    }
+
+    .header h1 {
+        font-size: 23px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}

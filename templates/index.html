@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeniden Değerleme ve Amortisman Hesaplama</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <h1>Yeniden Değerleme ve Amortisman</h1>
+            <p>Sabit kıymet listesini yükleyin ve otomatik hesaplama yapın</p>
+            <a class="template-link" href="/sablon-indir">Şablon Excel Dosyasını İndir</a>
+        </header>
+
+        <form id="calculationForm">
+            <label class="upload-area" id="uploadArea" for="excelFile">
+                <span class="upload-icon">📁</span>
+                <span class="upload-text">Excel Dosyasını Sürükle-Bırak</span>
+                <span class="upload-subtext">veya tıklayarak dosya seçin</span>
+                <input type="file" id="excelFile" name="excel_file" accept=".xlsx,.xlsm" required>
+            </label>
+
+            <div class="file-info" id="fileInfo">
+                <span>Seçilen dosya:</span>
+                <strong id="fileName"></strong>
+            </div>
+
+            <div class="grid">
+                <label class="form-group" for="islemYili">
+                    <span>İşlem Yılı</span>
+                    <input type="number" id="islemYili" name="islem_yili" min="2000" max="2100" value="2025" required>
+                </label>
+
+                <label class="form-group" for="donem">
+                    <span>Dönem</span>
+                    <select id="donem" name="donem" required>
+                        <option value="1">1. Dönem (3 Aylık)</option>
+                        <option value="2">2. Dönem (6 Aylık)</option>
+                        <option value="3">3. Dönem (9 Aylık)</option>
+                        <option value="4" selected>Yıllık</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="form-group" for="ydOrani">
+                <span>Yeniden Değerleme Oranı (%)</span>
+                <input type="text" id="ydOrani" name="yd_orani" placeholder="Örn: 25,49" required>
+            </label>
+
+            <button type="submit" class="btn" id="submitBtn">Hesaplamayı Başlat</button>
+        </form>
+
+        <section class="loading" id="loading" aria-live="polite">
+            <div class="spinner"></div>
+            <p>Hesaplama yapılıyor...</p>
+        </section>
+
+        <section class="error" id="error" aria-live="assertive"></section>
+
+        <section class="result" id="result">
+            <h2>İşlem başarıyla tamamlandı</h2>
+            <div class="result-item">
+                <span>İşlenen Sabit Kıymet</span>
+                <strong id="sabitKiymetSayisi">-</strong>
+            </div>
+            <div class="result-item">
+                <span>YD Fiş Sayısı</span>
+                <strong id="ydFisSayisi">-</strong>
+            </div>
+            <div class="result-item">
+                <span>Amortisman Fiş Sayısı</span>
+                <strong id="amortismanFisSayisi">-</strong>
+            </div>
+            <button class="btn download-btn" id="downloadBtn">Excel Dosyasını İndir</button>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
